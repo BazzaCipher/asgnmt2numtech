@@ -142,51 +142,64 @@ roll_ci <- data.table(
 )
 fwrite(roll_ci, "output/bootstrap_rolling_ci.csv")
 
-# ----- Augmented Figure 2 with bootstrap band -------------------------------
-plot_dt <- roll[!is.na(count_above_mp_ex_market) & n_assets == 25]
-crisis_band <- data.frame(xmin = CRISIS_START, xmax = CRISIS_END,
-                          ymin = -Inf, ymax = Inf)
+# ----- Figure 2b: distribution comparison (pre-crisis vs in-crisis) ---------
+# The bootstrap CI on the pre-crisis median is degenerate ([2, 2]) because the
+# statistic is an integer count, so a ribbon overlay carries no visual signal.
+# A distribution comparison conveys the +1 shift directly.
 
-SMOOTH_K <- 63L  # ~one trading quarter; smooths integer {1,2,3} step jaggedness
-plot_dt[, count_smooth := frollmean(count_above_mp_ex_market, SMOOTH_K,
-                                    align = "right", fill = NA)]
-roll_ci[, `:=`(
-  q025_smooth = frollmean(q025, SMOOTH_K, align = "right", fill = NA),
-  q975_smooth = frollmean(q975, SMOOTH_K, align = "right", fill = NA)
-)]
+dist_dt <- rbind(
+  data.table(regime = "Pre-crisis (2019–2023)",  count = pre_obs_counts),
+  data.table(regime = "In-crisis (2024–2026)",   count = in_obs_counts)
+)
+dist_dt[, regime := factor(regime,
+                           levels = c("Pre-crisis (2019–2023)",
+                                      "In-crisis (2024–2026)"))]
+prop_dt <- dist_dt[, .(n = .N), by = .(regime, count)]
+prop_dt[, prop := n / sum(n), by = regime]
+# Ensure every regime × count combination is represented (so the dodge has paired bars)
+all_counts <- sort(unique(prop_dt$count))
+all_regimes <- levels(prop_dt$regime)
+grid <- CJ(regime = all_regimes, count = all_counts)
+grid[, regime := factor(regime, levels = all_regimes)]
+prop_dt <- merge(grid, prop_dt, by = c("regime", "count"), all.x = TRUE)
+prop_dt[is.na(prop), `:=`(n = 0L, prop = 0)]
+prop_dt[, count := factor(count, levels = all_counts)]
 
-p2b <- ggplot() +
-  geom_rect(data = crisis_band,
-            aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-            inherit.aes = FALSE, fill = "tomato", alpha = 0.10) +
-  geom_ribbon(data = roll_ci[!is.na(q025_smooth)],
-              aes(x = date, ymin = q025_smooth, ymax = q975_smooth),
-              fill = "steelblue", alpha = 0.25) +
-  geom_step(data = plot_dt,
-            aes(x = date, y = count_above_mp_ex_market),
-            colour = "grey70", linewidth = 0.3) +
-  geom_line(data = plot_dt[!is.na(count_smooth)],
-            aes(x = date, y = count_smooth),
-            colour = "black", linewidth = 0.7) +
-  geom_hline(yintercept = ci["97.5%"], colour = "steelblue",
-             linetype = 2, alpha = 0.7) +
-  annotate("text",
-           x = as.Date("2018-06-01"),
-           y = ci["97.5%"] + 0.05,
-           label = sprintf("pre-crisis bootstrap 95%% upper bound = %.2f", ci["97.5%"]),
-           hjust = 0, colour = "steelblue", size = 3.3) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
-  scale_y_continuous(breaks = pretty_breaks()) +
+medians_dt <- dist_dt[, .(median_count = as.numeric(median(count)),
+                          n = .N,
+                          mean_count = round(mean(count), 2)),
+                      by = regime]
+
+p2b <- ggplot(prop_dt, aes(x = count, y = prop, fill = regime)) +
+  geom_col(position = position_dodge(width = 0.75), width = 0.7) +
+  geom_text(aes(label = scales::percent(prop, accuracy = 1)),
+            position = position_dodge(width = 0.75),
+            vjust = -0.3, size = 3.2) +
+  scale_fill_manual(values = c("Pre-crisis (2019–2023)" = "grey60",
+                               "In-crisis (2024–2026)"  = "tomato"),
+                    name = NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1),
+                     expand = expansion(mult = c(0, 0.12))) +
   labs(
-    title = "Figure 2b: Rolling count with stationary-bootstrap 95% CI",
-    subtitle = sprintf("Bootstrap CI on 2019-2023 baseline (N=25, block mean=%d, B=%d reps). Grey = raw integer count; black = %dd trailing mean.",
-                       BLOCK_MEAN, B, SMOOTH_K),
-    x = NULL, y = expression(paste("#{ ", lambda[k], " > ", lambda["+"], " }")),
-    caption = sprintf("Blue band = per-date 95%% bootstrap CI; dashed line = bootstrap CI upper bound of the pre-crisis MEDIAN (%.2f). In-crisis median = %.1f.",
-                      ci["97.5%"], in_obs_median)
+    title = "Figure 2b: Distribution of the rolling supra-MP count, pre-crisis vs in-crisis",
+    subtitle = sprintf(
+      "Pre-crisis (n = %d, median = %g, mean = %.2f).  In-crisis (n = %d, median = %g, mean = %.2f).  Bootstrap 95%% CI on the pre-crisis median: [%g, %g] (B = %d, block mean = %d).",
+      medians_dt$n[1], medians_dt$median_count[1], medians_dt$mean_count[1],
+      medians_dt$n[2], medians_dt$median_count[2], medians_dt$mean_count[2],
+      ci["2.5%"], ci["97.5%"], B, BLOCK_MEAN),
+    x = expression(paste("#{ ", lambda[k], " > ", lambda["+"], " }   (market mode excluded)")),
+    y = "fraction of rolling windows",
+    caption = sprintf(
+      "Mass shifts from count = 2 (modal pre-crisis, %.0f%% of windows) to count = 3 (modal in-crisis, %.0f%% of windows).",
+      100 * prop_dt[regime == "Pre-crisis (2019–2023)" & count == "2", prop],
+      100 * prop_dt[regime == "In-crisis (2024–2026)"  & count == "3", prop]
+    )
   ) +
   theme_minimal(base_size = 11) +
-  theme(panel.grid.minor = element_blank())
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        legend.position = "top",
+        plot.subtitle = element_text(size = 9))
 
-ggsave("figures/fig2b_count_with_ci.png", p2b, width = 10, height = 4.8, dpi = 200)
+ggsave("figures/fig2b_count_with_ci.png", p2b, width = 10, height = 5.2, dpi = 200)
 cat("\nWrote figures/fig2b_count_with_ci.png\n")

@@ -1,122 +1,306 @@
+# ============================================================
+# refs.yml  —  Hayagriva bibliography for paper.typ
+# Compile:  typst compile paper.typ  (uses ieee style)
+# 18 references covering: RMT/MP, DCC-GARCH, GJR/EGARCH,
+# structural breaks, bootstrap, commodity co-movement.
+# ============================================================
+
+# ── 1. MARCHENKO & PASTUR (1967) ────────────────────────────
+marchenko-pastur1967:
+  type: Article
+  title: "Distribution of eigenvalues for some sets of random matrices"
+  author:
+  - "Marchenko, Vladimir A."
+  - "Pastur, Leonid A."
+  date: 1967
+  parent:
+    type: Periodical
+    title: "Mathematics of the USSR-Sbornik"
+    volume: 1
+    issue: 4
+  page-range: "457-483"
+  doi: "10.1070/SM1967v001n04ABEH001994"
+
+# ── 2. LALOUX ET AL. (2000) ─────────────────────────────────
+laloux2000:
+  type: Article
+  title: "Random matrix theory and financial correlations"
+  author:
+  - "Laloux, Laurent"
+  - "Cizeau, Pierre"
+  - "Bouchaud, Jean-Philippe"
+  - "Potters, Marc"
+  date: 2000
+  parent:
+    type: Periodical
+    title: "International Journal of Theoretical and Applied Finance"
+    volume: 3
+    issue: 3
+  page-range: "391-397"
+  doi: "10.1142/S0219024900000255"
+
+# ── 3. ENGLE (2002) ─────────────────────────────────────────
 engle2002:
-  type: article
-  title: "Dynamic conditional correlation: a simple class of multivariate generalized autoregressive conditional heteroskedasticity models"
-  author: "Engle, Robert F."
+  type: Article
+  title: "Dynamic conditional correlation: A simple class of multivariate generalized autoregressive conditional heteroskedasticity models"
+  author:
+  - "Engle, Robert F."
   date: 2002
   parent:
-    type: periodical
+    type: Periodical
     title: "Journal of Business & Economic Statistics"
-  volume: 20
-  issue: 3
-  page-range: 339-350
+    volume: 20
+    issue: 3
+  page-range: "339-350"
+  doi: "10.1198/073500102288618487"
 
+# ── 4. ENGLE, LEDOIT & WOLF (2019) ──────────────────────────
 engle-ledoit-wolf2019:
-  type: article
+  type: Article
   title: "Large dynamic covariance matrices"
-  author: ["Engle, Robert F.", "Ledoit, Olivier", "Wolf, Michael"]
+  author:
+  - "Engle, Robert F."
+  - "Ledoit, Olivier"
+  - "Wolf, Michael"
   date: 2019
   parent:
-    type: periodical
+    type: Periodical
     title: "Journal of Business & Economic Statistics"
-  volume: 37
-  issue: 2
-  page-range: 363-375
+    volume: 37
+    issue: 2
+  page-range: "363-375"
+  doi: "10.1080/07350015.2017.1345683"
 
+# ── 5. GLOSTEN, JAGANNATHAN & RUNKLE (1993) ─────────────────
+glosten-jagannathan-runkle1993:
+  type: Article
+  title: "On the relation between the expected value and the volatility of the nominal excess return on stocks"
+  author:
+  - "Glosten, Lawrence R."
+  - "Jagannathan, Ravi"
+  - "Runkle, David E."
+  date: 1993
+  parent:
+    type: Periodical
+    title: "Journal of Finance"
+    volume: 48
+    issue: 5
+  page-range: "1779-1801"
+  doi: "10.1111/j.1540-6261.1993.tb05128.x"
+
+# ── 6. BAI & PERRON (2003) ──────────────────────────────────
+bai-perron2003:
+  type: Article
+  title: "Computation and analysis of multiple structural change models"
+  author:
+  - "Bai, Jushan"
+  - "Perron, Pierre"
+  date: 2003
+  parent:
+    type: Periodical
+    title: "Journal of Applied Econometrics"
+    volume: 18
+    issue: 1
+  page-range: "1-22"
+  doi: "10.1002/jae.659"
+
+# ── 7. POLITIS & ROMANO (1994) ──────────────────────────────
+politis-romano1994:
+  type: Article
+  title: "The stationary bootstrap"
+  author:
+  - "Politis, Dimitris N."
+  - "Romano, Joseph P."
+  date: 1994
+  parent:
+    type: Periodical
+    title: "Journal of the American Statistical Association"
+    volume: 89
+    issue: 428
+  page-range: "1303-1313"
+  doi: "10.1080/01621459.1994.10476870"
+
+# ── 8. ENGLE (1982) ─────────────────────────────────────────
+engle1982:
+  type: Article
+  title: "Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation"
+  author:
+  - "Engle, Robert F."
+  date: 1982
+  parent:
+    type: Periodical
+    title: "Econometrica"
+    volume: 50
+    issue: 4
+  page-range: "987-1007"
+  doi: "10.2307/1912773"
+
+# ── 9. BOLLERSLEV (1986) ────────────────────────────────────
+bollerslev1986:
+  type: Article
+  title: "Generalized autoregressive conditional heteroskedasticity"
+  author:
+  - "Bollerslev, Tim"
+  date: 1986
+  parent:
+    type: Periodical
+    title: "Journal of Econometrics"
+    volume: 31
+    issue: 3
+  page-range: "307-327"
+  doi: "10.1016/0304-4076(86)90063-1"
+
+# ── 10. NELSON (1991) ───────────────────────────────────────
+nelson1991:
+  type: Article
+  title: "Conditional heteroskedasticity in asset returns: A new approach"
+  author:
+  - "Nelson, Daniel B."
+  date: 1991
+  parent:
+    type: Periodical
+    title: "Econometrica"
+    volume: 59
+    issue: 2
+  page-range: "347-370"
+  doi: "10.2307/2938260"
+
+# ── 11. BAI & PERRON (1998) ─────────────────────────────────
+bai-perron1998:
+  type: Article
+  title: "Estimating and testing linear models with multiple structural changes"
+  author:
+  - "Bai, Jushan"
+  - "Perron, Pierre"
+  date: 1998
+  parent:
+    type: Periodical
+    title: "Econometrica"
+    volume: 66
+    issue: 1
+  page-range: "47-78"
+  doi: "10.2307/2998540"
+
+# ── 12. PLEROU ET AL. (1999) ────────────────────────────────
+plerou1999:
+  type: Article
+  title: "Universal and nonuniversal properties of cross-correlations in financial time series"
+  author:
+  - "Plerou, Vasiliki"
+  - "Gopikrishnan, Parameswaran"
+  - "Rosenow, Bernd"
+  - "Amaral, Luis A. N."
+  - "Stanley, H. Eugene"
+  date: 1999
+  parent:
+    type: Periodical
+    title: "Physical Review Letters"
+    volume: 83
+    issue: 7
+  page-range: "1471-1474"
+  doi: "10.1103/PhysRevLett.83.1471"
+
+# ── 13. BOUCHAUD & POTTERS (2003) ───────────────────────────
+bouchaud-potters2003:
+  type: Book
+  title: "Theory of Financial Risk and Derivative Pricing: From Statistical Physics to Risk Management"
+  author:
+  - "Bouchaud, Jean-Philippe"
+  - "Potters, Marc"
+  date: 2003
+  edition: "2nd"
+  publisher: "Cambridge University Press"
+  location: "Cambridge"
+  doi: "10.1017/CBO9780511753893"
+
+# ── 14. LEDOIT & WOLF (2004) ────────────────────────────────
+ledoit-wolf2004:
+  type: Article
+  title: "Honey, I shrunk the sample covariance matrix"
+  author:
+  - "Ledoit, Olivier"
+  - "Wolf, Michael"
+  date: 2004
+  parent:
+    type: Periodical
+    title: "Journal of Portfolio Management"
+    volume: 30
+    issue: 4
+  page-range: "110-119"
+  doi: "10.3905/jpm.2004.110"
+
+# ── 15. BOLLERSLEV (1990) ───────────────────────────────────
+bollerslev1990:
+  type: Article
+  title: "Modelling the coherence in short-run nominal exchange rates: A multivariate generalized ARCH model"
+  author:
+  - "Bollerslev, Tim"
+  date: 1990
+  parent:
+    type: Periodical
+    title: "Review of Economics and Statistics"
+    volume: 72
+    issue: 3
+  page-range: "498-505"
+  doi: "10.2307/2109358"
+
+# ── 16. PINDYCK & ROTEMBERG (1990) ──────────────────────────
+pindyck-rotemberg1990:
+  type: Article
+  title: "The excess co-movement of commodity prices"
+  author:
+  - "Pindyck, Robert S."
+  - "Rotemberg, Julio J."
+  date: 1990
+  parent:
+    type: Periodical
+    title: "Economic Journal"
+    volume: 100
+    issue: 403
+  page-range: "1173-1189"
+  doi: "10.2307/2233966"
+
+# ── 17. TANG & XIONG (2012) ─────────────────────────────────
+tang-xiong2012:
+  type: Article
+  title: "Index investment and the financialization of commodities"
+  author:
+  - "Tang, Ke"
+  - "Xiong, Wei"
+  date: 2012
+  parent:
+    type: Periodical
+    title: "Financial Analysts Journal"
+    volume: 68
+    issue: 6
+  page-range: "54-74"
+  doi: "10.2469/faj.v68.n6.5"
+
+# ── 18. GILBERT (2010) ──────────────────────────────────────
+gilbert2010:
+  type: Article
+  title: "How to understand high food prices"
+  author:
+  - "Gilbert, Christopher L."
+  date: 2010
+  parent:
+    type: Periodical
+    title: "Journal of Agricultural Economics"
+    volume: 61
+    issue: 2
+  page-range: "398-425"
+  doi: "10.1111/j.1477-9552.2010.00248.x"
+
+# ── 19. HANSEN (1994) ──────────────────────────────────────
 hansen1994:
-  type: article
+  type: Article
   title: "Autoregressive conditional density estimation"
   author: "Hansen, Bruce E."
   date: 1994
   parent:
-    type: periodical
+    type: Periodical
     title: "International Economic Review"
-  volume: 35
-  issue: 3
-  page-range: 705-730
-
-glosten-jagannathan-runkle1993:
-  type: article
-  title: "On the relation between the expected value and the volatility of the nominal excess return on stocks"
-  author: ["Glosten, Lawrence R.", "Jagannathan, Ravi", "Runkle, David E."]
-  date: 1993
-  parent:
-    type: periodical
-    title: "Journal of Finance"
-  volume: 48
-  issue: 5
-  page-range: 1779-1801
-
-marchenko-pastur1967:
-  type: article
-  title: "Distribution of eigenvalues for some sets of random matrices"
-  author: ["Marčenko, V. A.", "Pastur, L. A."]
-  date: 1967
-  parent:
-    type: periodical
-    title: "Mathematics of the USSR-Sbornik"
-  volume: 1
-  issue: 4
-  page-range: 457-483
-
-laloux2000:
-  type: article
-  title: "Random matrix theory and financial correlations"
-  author: ["Laloux, Laurent", "Cizeau, Pierre", "Potters, Marc", "Bouchaud, Jean-Philippe"]
-  date: 2000
-  parent:
-    type: periodical
-    title: "International Journal of Theoretical and Applied Finance"
-  volume: 3
-  issue: 3
-  page-range: 391-397
-
-bouchaud-potters2009:
-  type: chapter
-  title: "Financial applications of random matrix theory: a short review"
-  author: ["Bouchaud, Jean-Philippe", "Potters, Marc"]
-  date: 2009
-  parent:
-    type: book
-    title: "The Oxford Handbook of Random Matrix Theory"
-
-bai-perron2003:
-  type: article
-  title: "Computation and analysis of multiple structural change models"
-  author: ["Bai, Jushan", "Perron, Pierre"]
-  date: 2003
-  parent:
-    type: periodical
-    title: "Journal of Applied Econometrics"
-  volume: 18
-  issue: 1
-  page-range: 1-22
-
-politis-romano1994:
-  type: article
-  title: "The stationary bootstrap"
-  author: ["Politis, Dimitris N.", "Romano, Joseph P."]
-  date: 1994
-  parent:
-    type: periodical
-    title: "Journal of the American Statistical Association"
-  volume: 89
-  issue: 428
-  page-range: 1303-1313
-
-arfaoui2013:
-  type: article
-  title: "Return and volatility transmission between oil prices and oil-exporting and oil-importing countries"
-  author: "Arfaoui, Mongi"
-  date: 2013
-  parent:
-    type: periodical
-    title: "Energy Economics"
-  volume: 39
-  page-range: 230-242
-
-icco2025:
-  type: report
-  title: "Quarterly Bulletin of Cocoa Statistics"
-  author: "International Cocoa Organization"
-  date: 2025
-  publisher: "ICCO"
+    volume: 35
+    issue: 3
+  page-range: "705-730"
+  doi: "10.2307/2527081"
