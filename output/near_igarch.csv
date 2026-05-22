@@ -1,0 +1,13 @@
+ticker,model,persistence,alpha1,beta1,gamma1
+OJ,gjr_sstd,0.999,0.033,0.967,-0.001
+GHS,gjr_sstd,0.999,0.308,0.679,0.023
+COCOA_NY,gjr_sstd,0.9981,0.041,0.965,-0.016
+COFFEE_ROB,gjr_sstd,0.998,0.018,0.98,0
+COCOA_LDN,gjr_sstd,0.9958,0.044,0.94,0.023
+VND,gjr_n,0.9948,0.09,0.919,-0.029
+BRL,gjr_sstd,0.9933,0.058,0.955,-0.039
+COFFEE_ARA,gjr_sstd,0.9923,0.039,0.968,-0.029
+US10Y,gjr_sstd,0.9919,0.048,0.942,0.005
+DXY,gjr_sstd,0.9916,0.041,0.952,-0.004
+SUGAR,gjr_sstd,0.9905,0.007,0.976,0.014
+COTTON,gjr_sstd,0.9905,0.047,0.944,-0.002

@@ -1,0 +1,11 @@
+test,description,metric,threshold,pass,note
+T1,Pre-crisis rolling-count baseline stability,"median=2, IQR=[2,3], range=[1,3]","IQR width <= 1 AND values in {1,2,3}",TRUE,In-crisis median = 3 (+1 vs pre)
+T2(a),"Bai-Perron BIC break in [2024-01-01, 2024-12-31]",BIC selects 0 breaks,>=1 break inside the 2024 attribution window,FALSE,BIC argmin at m=0 (BIC=931.52)
+T2(b),In-crisis median > 95% bootstrap CI upper bound,"CI=[2.00, 2.00], in-crisis median=3",in-crisis median > CI upper bound,TRUE,1-bit comparison; bootstrap CI degenerate on integer statistic
+T3(a),"Original spec: subsample emerging eigenvalue, bloc>=0.55","rank=-, bloc_share=-",bloc_share >= 0.55 (pre-reg),FALSE,""
+T3(b),"Original spec: rolling >=50%/<50% emerging rank, bloc>=0.55","rank=4, bloc_share=0.078",bloc_share >= 0.55 (pre-reg),FALSE,""
+T3(c@0.55),"Paper rewrite: rank-1 reorganisation, bloc>=0.55 AND doubling","rank=1, bloc_share=0.516",bloc_share >= 0.55 (pre-reg),FALSE,""
+T3(c@0.50),"Paper rewrite (moved threshold): rank-1 reorganisation, bloc>=0.50 AND doubling","rank=1, bloc_share=0.516",bloc_share >= 0.50 (moved goalpost),TRUE,Threshold 0.50 differs from pre-registered 0.55
+S1,Cleaned DCC reduces OOS MVP variance in crisis,"sd_std=1.019%, sd_clean=1.019% (crisis), var_red=0%",variance reduction >= 5%,FALSE,Engle-Ledoit-Wolf 2019 metric; cleaned ~= standard at N=25
+S2,BIC-selected in-crisis break in cocoa-coffee or cocoa-sugar pair,BIC selects 0 breaks in all 11 pairs,>=1 in-crisis break in either pair,FALSE,All 11 cocoa-anchored pairs have 0 BIC-selected breaks
+S3,Cocoa NY-LDN basis decouples by >=0.15 in crisis,"baseline_mean=0.542, crisis_mean=0.627 (change +0.085); crisis_min=0.528",baseline_mean - crisis_min >= 0.15,FALSE,"basis RE-COUPLED (+0.085), opposite of prediction"

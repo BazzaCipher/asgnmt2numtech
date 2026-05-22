@@ -22,6 +22,18 @@ engle-ledoit-wolf2019:
   issue: 2
   page-range: 363-375
 
+hansen1994:
+  type: article
+  title: "Autoregressive conditional density estimation"
+  author: "Hansen, Bruce E."
+  date: 1994
+  parent:
+    type: periodical
+    title: "International Economic Review"
+  volume: 35
+  issue: 3
+  page-range: 705-730
+
 glosten-jagannathan-runkle1993:
   type: article
   title: "On the relation between the expected value and the volatility of the nominal excess return on stocks"

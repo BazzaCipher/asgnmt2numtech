@@ -1,5 +1,5 @@
 test,description,rank,bloc_share,pass
 a_emerging_subsample,"Original spec: subsample emerging eigenvalue, bloc>=0.55",,,FALSE
-b_emerging_rolling,"Original spec: rolling >=50%/<50% emerging rank, bloc>=0.55",4,0.0748100113689466,FALSE
-c_rank1_paper_at_0.55,"Paper rewrite: rank-1 reorganisation, bloc>=0.55 AND doubling",1,0.516832239740269,FALSE
-c_rank1_paper_at_0.50,"Paper rewrite (moved threshold): rank-1 reorganisation, bloc>=0.50 AND doubling",1,0.516832239740269,TRUE
+b_emerging_rolling,"Original spec: rolling >=50%/<50% emerging rank, bloc>=0.55",4,0.0778911829132375,FALSE
+c_rank1_paper_at_0.55,"Paper rewrite: rank-1 reorganisation, bloc>=0.55 AND doubling",1,0.516152009460145,FALSE
+c_rank1_paper_at_0.50,"Paper rewrite (moved threshold): rank-1 reorganisation, bloc>=0.50 AND doubling",1,0.516152009460145,TRUE
