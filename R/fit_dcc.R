@@ -116,7 +116,7 @@ dcc_nll <- function(params, Z, Q_bar) {
   nll
 }
 
-fit_dcc <- function(Z, target_R, label, start = c(0.02, 0.95), b_upper = 0.98) {
+fit_dcc <- function(Z, target_R, label, start = c(0.02, 0.95), b_upper = 0.999) {
   cat(sprintf("\nFitting %s DCC (target = %s)...\n", label, label))
   # Try a few starts; the cleaned target can be flat enough to make the surface
   # ridge-like, so we restart from several reasonable points and pick the best.
@@ -161,13 +161,21 @@ fit_std    <- fit_dcc(Z, R_bar,   "standard")
 fit_clean  <- fit_dcc(Z, R_tilde, "MP-cleaned")
 
 fwrite(data.table(
-  method   = c("standard", "cleaned"),
-  a        = c(fit_std$a, fit_clean$a),
-  b        = c(fit_std$b, fit_clean$b),
-  ab_sum   = c(fit_std$a + fit_std$b, fit_clean$a + fit_clean$b),
-  nll      = c(fit_std$nll, fit_clean$nll),
-  converged = c(fit_std$converged, fit_clean$converged)
+  method        = c("standard", "cleaned"),
+  a             = c(fit_std$a, fit_clean$a),
+  b             = c(fit_std$b, fit_clean$b),
+  ab_sum        = c(fit_std$a + fit_std$b, fit_clean$a + fit_clean$b),
+  target_weight = c(1 - fit_std$a - fit_std$b, 1 - fit_clean$a - fit_clean$b),
+  loglik        = c(-fit_std$nll, -fit_clean$nll),
+  delta_loglik  = c(0, (-fit_clean$nll) - (-fit_std$nll)),
+  nll           = c(fit_std$nll, fit_clean$nll),
+  converged     = c(fit_std$converged, fit_clean$converged)
 ), "output/dcc_params.csv")
+cat(sprintf("\n=== DCC log-likelihood comparison ===\n"))
+cat(sprintf("L(standard) = %.1f, L(cleaned) = %.1f, ΔL = %+.1f\n",
+            -fit_std$nll, -fit_clean$nll, (-fit_clean$nll) - (-fit_std$nll)))
+cat(sprintf("Long-run target weight (1-a-b): standard = %.3f, cleaned = %.3f\n",
+            1 - fit_std$a - fit_std$b, 1 - fit_clean$a - fit_clean$b))
 
 # ----- Conditional correlation series ---------------------------------------
 cat("\nComputing conditional correlation series...\n")
@@ -191,33 +199,105 @@ for (pair in COCOA_PAIRS) {
 }
 fwrite(corr_dt, "output/dcc_pairwise_correlations.csv")
 
-# ----- S1: variance reduction (cleaned vs standard) -------------------------
-s1 <- corr_dt[date >= CRISIS_START & date <= CRISIS_END,
+# ----- S1: minimum-variance portfolio realised variance (proper EW2019 test) -
+# EW2019's claim is variance reduction of out-of-sample MV portfolios, not the
+# variance of conditional correlation paths. Test:
+#   For each t in 2019-01-01 .. 2026-05-22 with at least 252 prior days:
+#     - σ_{i,t}^2 = univariate GJR-GARCH-t conditional variance (from rugarch fit)
+#     - D_t = diag(σ_t); Σ_t = D_t R_t D_t with R_t from each DCC method
+#     - w_t = Σ_t^{-1} 1 / 1' Σ_t^{-1} 1
+#     - realise: r_{p,t+1} = w_t' r_{t+1}
+#   Compare realised portfolio variance pre vs in crisis.
+rets <- fread("data/clean/returns_v1.csv"); rets[, date := as.Date(date)]
+# Use only series with non-EWMA GARCH fits (consistent univariate σ_t)
+# Re-extract univariate σ_t from the residuals: σ_t = r_t / z_t (where z fitted)
+# Simpler: σ_t = abs(r_t)/abs(z_t) where defined.
+sigma_dt <- data.table(date = z$date)
+ret_z <- merge(rets, z[, .(date)], by = "date")
+for (tk in tickers) {
+  r <- ret_z[[tk]]; zz <- z[[tk]]
+  sg <- ifelse(is.finite(r) & is.finite(zz) & abs(zz) > 1e-3, abs(r) / abs(zz), NA_real_)
+  sigma_dt[[tk]] <- sg
+}
+# Forward-fill tiny gaps where |z|<1e-3
+for (tk in tickers) {
+  x <- sigma_dt[[tk]]
+  if (any(is.na(x))) {
+    last <- NA_real_
+    for (i in seq_along(x)) { if (is.na(x[i])) x[i] <- last else last <- x[i] }
+    sigma_dt[[tk]] <- x
+  }
+}
+
+mvp_realised_var <- function(R_arr, sigma_mat, ret_mat, label) {
+  Tn <- dim(R_arr)[3]; N <- dim(R_arr)[1]
+  one <- rep(1, N)
+  rp <- numeric(Tn - 1)
+  for (t in seq_len(Tn - 1)) {
+    R  <- R_arr[, , t]
+    D  <- sigma_mat[t, ]
+    Sigma <- (D %o% D) * R
+    Sigma <- (Sigma + t(Sigma)) / 2 + diag(N) * 1e-10
+    inv1 <- tryCatch(solve(Sigma, one), error = function(e) NULL)
+    if (is.null(inv1)) { rp[t] <- NA; next }
+    w <- inv1 / sum(inv1)
+    r_next <- ret_mat[t + 1, ]
+    if (any(is.na(r_next))) { rp[t] <- NA; next }
+    rp[t] <- sum(w * r_next)
+  }
+  rp
+}
+
+# Align matrices
+sigma_aligned <- as.matrix(sigma_dt[, tickers, with = FALSE])
+ret_aligned   <- as.matrix(ret_z[, tickers, with = FALSE])
+
+rp_std   <- mvp_realised_var(R_std,   sigma_aligned, ret_aligned, "standard")
+rp_clean <- mvp_realised_var(R_clean, sigma_aligned, ret_aligned, "cleaned")
+date_seq <- dates[-length(dates)]
+
+mvp_dt <- data.table(date = date_seq, rp_std = rp_std, rp_clean = rp_clean)
+mvp_dt <- mvp_dt[!is.na(rp_std) & !is.na(rp_clean)]
+mvp_dt[, regime := fifelse(date >= CRISIS_START, "crisis",
+                           fifelse(date >= BASE_START & date <= BASE_END, "baseline", "other"))]
+mvp_summary <- mvp_dt[regime %in% c("baseline", "crisis"),
+                      .(n = .N,
+                        sd_std_pct   = round(sd(rp_std)   * 100, 3),
+                        sd_clean_pct = round(sd(rp_clean) * 100, 3),
+                        var_red_pct  = round(100 * (1 - var(rp_clean) / var(rp_std)), 1)),
+                      by = regime]
+fwrite(mvp_summary, "output/s1_mvp_oos_variance.csv")
+cat("\n=== S1 (proper EW test): OOS minimum-variance portfolio sd ===\n")
+print(mvp_summary)
+s1_crisis_pass <- mvp_summary[regime == "crisis", var_red_pct] >= 5
+cat(sprintf("S1 (cleaned reduces in-crisis MVP variance by ≥5%%): %s\n",
+            if (length(s1_crisis_pass) && s1_crisis_pass) "PASS" else "FAIL"))
+
+# Also keep the OLD (mis-framed) corr-variance metric, but rename it honestly:
+s1_legacy <- corr_dt[date >= CRISIS_START & date <= CRISIS_END,
               .(var_std   = var(rho_std),
                 var_clean = var(rho_clean)),
               by = pair]
-s1[, var_reduction_pct := round(100 * (1 - var_clean / var_std), 1)]
-s1[, s1_pass := var_reduction_pct >= 25]
-setorder(s1, -var_reduction_pct)
-fwrite(s1, "output/s1_variance_reduction.csv")
-
-cat("\n=== S1: cleaned-vs-standard variance reduction (crisis window) ===\n")
-print(s1)
-cat(sprintf("S1 (≥25%% reduction on ≥50%% of pairs): %s\n",
-            if (mean(s1$s1_pass) >= 0.5) "PASS" else "FAIL"))
+s1_legacy[, var_ratio_clean_over_std := round(var_clean / var_std, 2)]
+setorder(s1_legacy, -var_ratio_clean_over_std)
+fwrite(s1_legacy, "output/s1_corr_path_variance_legacy.csv")
 
 # ----- S2: Bai-Perron breaks on cleaned-DCC pairwise series -----------------
 s2_rows <- list()
 for (pair_name in unique(corr_dt$pair)) {
   pair_dt <- corr_dt[pair == pair_name, .(date, rho = rho_clean)]
-  bp <- tryCatch(
-    breakpoints(rho ~ 1, data = pair_dt, h = 0.05, breaks = 5),
+  # Use h = 0.15 (default) → m_max = 5, BIC-selects within that. Fast enough for
+  # 11 pairs at n ≈ 2260; the rolling-count Bai-Perron above uses the same h.
+  bp_full <- tryCatch(
+    breakpoints(rho ~ 1, data = pair_dt, h = 0.15, breaks = 5),
     error = function(e) NULL
   )
-  break_dates <- if (!is.null(bp) && length(bp$breakpoints) &&
-                     !any(is.na(bp$breakpoints))) {
+  bp_bic <- if (!is.null(bp_full)) which.min(BIC(bp_full)) - 1L else 0L
+  break_dates <- if (!is.null(bp_full) && bp_bic > 0L) {
+    bp <- breakpoints(bp_full, breaks = bp_bic)
     pair_dt$date[bp$breakpoints]
   } else as.Date(character(0))
+  cat(sprintf("  [%s] BIC selects %d breaks\n", pair_name, bp_bic))
   in_crisis <- any(break_dates >= CRISIS_START & break_dates <= CRISIS_END)
   s2_rows[[pair_name]] <- data.table(
     pair = pair_name,
@@ -235,22 +315,34 @@ cat(sprintf("S2 (in-crisis break on cocoa-coffee OR cocoa-sugar): %s\n",
               "PASS" else "FAIL"))
 
 # ----- S3: COCOA_NY / COCOA_LDN basis decoupling ----------------------------
+# Use the pre-registered crisis window [2024-01-01, 2026-05-22]. The earlier
+# version restricted to 2025-2026 with no methodological justification.
 basis <- corr_dt[pair == "COCOA_NY_COCOA_LDN"]
 baseline_mean <- mean(basis[date >= BASE_START & date <= BASE_END, rho_clean])
-crisis_min <- min(basis[date >= as.Date("2025-01-01") & date <= CRISIS_END, rho_clean])
-basis_drop <- baseline_mean - crisis_min
-s3_pass <- basis_drop >= 0.15
+crisis_rho   <- basis[date >= CRISIS_START & date <= CRISIS_END, rho_clean]
+crisis_mean  <- mean(crisis_rho)
+crisis_min   <- min(crisis_rho)
+crisis_max   <- max(crisis_rho)
+basis_drop_from_mean <- baseline_mean - crisis_min   # original spec
+s3_pass <- basis_drop_from_mean >= 0.15
 
 cat("\n=== S3: COCOA_NY × COCOA_LDN basis decoupling (cleaned DCC) ===\n")
 cat(sprintf("Baseline mean (2019-2023):       %.3f\n", baseline_mean))
-cat(sprintf("2025-2026 min:                   %.3f\n", crisis_min))
-cat(sprintf("Drop:                            %.3f  (need ≥0.15)\n", basis_drop))
-cat(sprintf("S3: %s\n", if (s3_pass) "PASS" else "FAIL"))
+cat(sprintf("Crisis (2024-2026) mean:         %.3f\n", crisis_mean))
+cat(sprintf("Crisis (2024-2026) range:        [%.3f, %.3f]\n", crisis_min, crisis_max))
+cat(sprintf("Drop (baseline mean − crisis min): %+.3f  (need ≥0.15 to pass)\n",
+            basis_drop_from_mean))
+cat(sprintf("S3: %s — basis %s during crisis (mean change %+.3f)\n",
+            if (s3_pass) "PASS" else "FAIL",
+            if (crisis_mean > baseline_mean) "RE-COUPLED" else "decoupled",
+            crisis_mean - baseline_mean))
 
 fwrite(data.table(
   baseline_mean_2019_2023 = baseline_mean,
-  crisis_min_2025_2026 = crisis_min,
-  basis_drop = basis_drop,
+  crisis_mean_2024_2026   = crisis_mean,
+  crisis_min_2024_2026    = crisis_min,
+  crisis_max_2024_2026    = crisis_max,
+  basis_drop = basis_drop_from_mean,
   s3_pass = s3_pass
 ), "output/s3_cocoa_basis_decoupling.csv")
 

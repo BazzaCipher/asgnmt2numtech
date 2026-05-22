@@ -107,14 +107,17 @@ run_variant <- function(label, z_dt, tickers, window) {
   pre_z_mat <- as.matrix(z_pre[, tickers, with = FALSE])
   ci <- boot_median_ci(pre_z_mat, window)
 
-  bp <- tryCatch(
-    breakpoints(count ~ 1, data = roll[!is.na(count), .(date, count)],
-                h = 0.1, breaks = 5),
+  bp_input <- roll[!is.na(count), .(date, count)]
+  bp_full <- tryCatch(
+    breakpoints(count ~ 1, data = bp_input, h = 0.05),
     error = function(e) NULL
   )
-  break_dates <- if (!is.null(bp) && length(bp$breakpoints) && !any(is.na(bp$breakpoints))) {
-    roll[!is.na(count)][bp$breakpoints, date]
+  bp_bic <- if (!is.null(bp_full)) which.min(BIC(bp_full)) - 1L else 0L
+  break_dates <- if (!is.null(bp_full) && bp_bic > 0L) {
+    bp <- breakpoints(bp_full, breaks = bp_bic)
+    bp_input$date[bp$breakpoints]
   } else as.Date(character(0))
+  cat(sprintf("  BIC selects %d breaks\n", bp_bic))
   in_crisis_break <- any(break_dates >= CRISIS_START & break_dates <= CRISIS_END)
 
   result <- data.table(

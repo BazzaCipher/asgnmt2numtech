@@ -139,15 +139,27 @@ cat(sprintf("Wrote output/rolling_count_v1.csv (%d windows)\n", nrow(out)))
 # ----- Bai-Perron breaks on the count series --------------------------------
 plot_dt <- out[!is.na(count_above_mp_ex_market)]
 bp_input <- plot_dt[, .(date, count = count_above_mp_ex_market)]
-bp <- tryCatch(
-  breakpoints(count ~ 1, data = bp_input, h = 0.1, breaks = 5),
+bp_full <- tryCatch(
+  breakpoints(count ~ 1, data = bp_input, h = 0.05),
   error = function(e) NULL
 )
-break_dates <- if (!is.null(bp) && length(bp$breakpoints) && !any(is.na(bp$breakpoints))) {
-  bp_input$date[bp$breakpoints]
-} else as.Date(character(0))
-cat(sprintf("Bai-Perron break dates: %s\n",
+bp_bic <- if (!is.null(bp_full)) which.min(BIC(bp_full)) - 1L else 0L
+if (!is.null(bp_full) && bp_bic > 0L) {
+  bp <- breakpoints(bp_full, breaks = bp_bic)
+  break_dates <- bp_input$date[bp$breakpoints]
+} else {
+  break_dates <- as.Date(character(0))
+}
+cat(sprintf("Bai-Perron BIC selects %d breaks: %s\n",
+            bp_bic,
             if (length(break_dates)) paste(break_dates, collapse = ", ") else "none"))
+# Also save BIC table for diagnostics
+if (!is.null(bp_full)) {
+  bic_vec <- BIC(bp_full)
+  fwrite(data.table(n_breaks = seq_along(bic_vec) - 1L,
+                    BIC = as.numeric(bic_vec)),
+         "output/bai_perron_bic_table.csv")
+}
 fwrite(data.table(break_date = break_dates), "output/bai_perron_breaks.csv")
 
 # ----- Figure 2: rolling count with crisis band + breaks --------------------
