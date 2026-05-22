@@ -1,0 +1,2 @@
+pre_obs_median,in_obs_median,bootstrap_median,ci_lo_95,ci_hi_95,t2b_pass,B,block_mean
+2,3,2,2,2,TRUE,1000,25

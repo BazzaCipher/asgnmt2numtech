@@ -1,0 +1,19 @@
+# R session state
+.Rhistory
+.RData
+.Rapp.history
+.Rproj.user/
+*.Rproj
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Editor noise
+*.swp
+*~
+.vscode/
+.idea/
+
+# Logs
+*.log

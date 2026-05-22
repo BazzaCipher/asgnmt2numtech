@@ -1,0 +1,110 @@
+engle2002:
+  type: article
+  title: "Dynamic conditional correlation: a simple class of multivariate generalized autoregressive conditional heteroskedasticity models"
+  author: "Engle, Robert F."
+  date: 2002
+  parent:
+    type: periodical
+    title: "Journal of Business & Economic Statistics"
+  volume: 20
+  issue: 3
+  page-range: 339-350
+
+engle-ledoit-wolf2019:
+  type: article
+  title: "Large dynamic covariance matrices"
+  author: ["Engle, Robert F.", "Ledoit, Olivier", "Wolf, Michael"]
+  date: 2019
+  parent:
+    type: periodical
+    title: "Journal of Business & Economic Statistics"
+  volume: 37
+  issue: 2
+  page-range: 363-375
+
+glosten-jagannathan-runkle1993:
+  type: article
+  title: "On the relation between the expected value and the volatility of the nominal excess return on stocks"
+  author: ["Glosten, Lawrence R.", "Jagannathan, Ravi", "Runkle, David E."]
+  date: 1993
+  parent:
+    type: periodical
+    title: "Journal of Finance"
+  volume: 48
+  issue: 5
+  page-range: 1779-1801
+
+marchenko-pastur1967:
+  type: article
+  title: "Distribution of eigenvalues for some sets of random matrices"
+  author: ["Marčenko, V. A.", "Pastur, L. A."]
+  date: 1967
+  parent:
+    type: periodical
+    title: "Mathematics of the USSR-Sbornik"
+  volume: 1
+  issue: 4
+  page-range: 457-483
+
+laloux2000:
+  type: article
+  title: "Random matrix theory and financial correlations"
+  author: ["Laloux, Laurent", "Cizeau, Pierre", "Potters, Marc", "Bouchaud, Jean-Philippe"]
+  date: 2000
+  parent:
+    type: periodical
+    title: "International Journal of Theoretical and Applied Finance"
+  volume: 3
+  issue: 3
+  page-range: 391-397
+
+bouchaud-potters2009:
+  type: chapter
+  title: "Financial applications of random matrix theory: a short review"
+  author: ["Bouchaud, Jean-Philippe", "Potters, Marc"]
+  date: 2009
+  parent:
+    type: book
+    title: "The Oxford Handbook of Random Matrix Theory"
+
+bai-perron2003:
+  type: article
+  title: "Computation and analysis of multiple structural change models"
+  author: ["Bai, Jushan", "Perron, Pierre"]
+  date: 2003
+  parent:
+    type: periodical
+    title: "Journal of Applied Econometrics"
+  volume: 18
+  issue: 1
+  page-range: 1-22
+
+politis-romano1994:
+  type: article
+  title: "The stationary bootstrap"
+  author: ["Politis, Dimitris N.", "Romano, Joseph P."]
+  date: 1994
+  parent:
+    type: periodical
+    title: "Journal of the American Statistical Association"
+  volume: 89
+  issue: 428
+  page-range: 1303-1313
+
+arfaoui2013:
+  type: article
+  title: "Return and volatility transmission between oil prices and oil-exporting and oil-importing countries"
+  author: "Arfaoui, Mongi"
+  date: 2013
+  parent:
+    type: periodical
+    title: "Energy Economics"
+  volume: 39
+  page-range: 230-242
+
+icco2025:
+  type: report
+  title: "Quarterly Bulletin of Cocoa Statistics"
+  author: "International Cocoa Organization"
+  date: 2025
+  publisher: "ICCO"

@@ -1,0 +1,6 @@
+variant,universe_size,window,pre_median,in_median,boot_ci_lo,boot_ci_hi,t2b_pass,n_breaks,in_crisis_break,first_crisis_break
+baseline (W=252),25,252,2,3,2,2,TRUE,5,TRUE,2024-07-08
+excl GHANA10Y (W=252),24,252,2,3,2,2.76249999999999,TRUE,5,TRUE,2024-07-11
+baseline (W=504),25,504,3,3,3,3,FALSE,5,TRUE,2025-04-02
+excl GHANA10Y (W=504),24,504,3,3,3,3,FALSE,5,TRUE,2025-04-02
+Gaussian GJR (W=252),25,252,2,3,2,2,TRUE,5,TRUE,2024-07-08
