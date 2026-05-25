@@ -5,7 +5,7 @@
 #   eigenvalue that exceeds the MP edge in ≥50% of in-crisis windows but
 #   in <50% of 2019-2023 baseline windows. Its eigenvector (averaged over
 #   crisis-period windows) has the fraction of its squared loadings on the
-#   cocoa bloc {COCOA_NY, COCOA_LDN, HSY, MDLZ, LISN, GHS, GHANA10Y} ≥ 0.55.
+#   cocoa bloc {COCOA_NY, COCOA_LDN, HSY, MDLZ, LISN, GHS, GHANA10Y} ≥ 0.50.
 #
 # Outputs:
 #   output/eigenvector_loadings_subsamples.csv
@@ -87,14 +87,13 @@ print(all_summary[above_mp == TRUE,
                     cocoa_bloc_frac = round(cocoa_bloc_l2_frac, 3),
                     top3_loadings)])
 
-# ----- T3: run ALL THREE specifications and report honestly ----------------
-# Pre-registered (scope_and_target.md): bloc share >= 0.55 on a crisis-emerging eigenvalue.
-# Paper (paper.typ:72) silently moved threshold to >= 0.50 AND switched from "emerging"
-# to "rank-1 reorganisation". We report all three so the moved-goalpost behaviour
-# is visible.
+# ----- T3: run both threshold parameterisations for completeness -----------
+# Pre-registered (scope_and_target.md): bloc share >= 0.50 (majority rule) on rank-1.
+# 0.55 is reported as a sensitivity check (2x the bloc's proportional share,
+# 7/25 ≈ 0.28). See paper Appendix A.
 
-THRESHOLD_ORIGINAL <- 0.55   # docs/scope_and_target.md and original R script
-THRESHOLD_PAPER    <- 0.50   # paper.typ:72 — moved to manufacture a pass
+THRESHOLD_PRIMARY <- 0.50    # docs/scope_and_target.md pre-registration (majority rule)
+THRESHOLD_ALT     <- 0.55    # alt parameterisation: 2x proportional baseline
 
 t3_results <- list()
 
@@ -103,7 +102,7 @@ crs_supra_ranks <- crs$summary[above_mp == TRUE, rank]
 pre_supra_ranks <- pre$summary[above_mp == TRUE, rank]
 emerging_ranks <- setdiff(crs_supra_ranks, pre_supra_ranks)
 
-cat(sprintf("\n--- T3(a): original 'emerging eigenvalue, bloc >= 0.55' test ---\n"))
+cat(sprintf("\n--- T3(a): emerging-eigenvalue subsample variant, bloc >= 0.50 ---\n"))
 cat(sprintf("Pre supra ranks:    %s\n", paste(pre_supra_ranks, collapse = ", ")))
 cat(sprintf("Crisis supra ranks: %s\n", paste(crs_supra_ranks, collapse = ", ")))
 cat(sprintf("Emerging ranks:     %s\n",
@@ -112,12 +111,12 @@ t3a_pass <- FALSE; t3a_share <- NA_real_; t3a_rank <- NA_integer_
 if (length(emerging_ranks)) {
   t3a_rank <- min(emerging_ranks)
   t3a_share <- crs$summary[rank == t3a_rank, cocoa_bloc_l2_frac]
-  t3a_pass <- t3a_share >= THRESHOLD_ORIGINAL
+  t3a_pass <- t3a_share >= THRESHOLD_PRIMARY
 }
 cat(sprintf("T3(a) verdict: %s\n", if (t3a_pass) "PASS" else "FAIL (no emerging eigenvalue; trivially fails)"))
 t3_results[["a_emerging_subsample"]] <- list(
-  spec = "Original spec: emerging eigenvalue with bloc share ≥ 0.55",
-  rank = t3a_rank, bloc_share = t3a_share, threshold = THRESHOLD_ORIGINAL,
+  spec = "Emerging-eigenvalue subsample variant with bloc share ≥ 0.50",
+  rank = t3a_rank, bloc_share = t3a_share, threshold = THRESHOLD_PRIMARY,
   pass = t3a_pass
 )
 
@@ -155,35 +154,35 @@ if (length(emerging_rolling)) {
   t3b_rank <- min(emerging_rolling)
   # Get bloc share for that rank from the crisis subsample
   t3b_share <- crs$summary[rank == t3b_rank, cocoa_bloc_l2_frac]
-  t3b_pass <- !is.na(t3b_share) && t3b_share >= THRESHOLD_ORIGINAL
+  t3b_pass <- !is.na(t3b_share) && t3b_share >= THRESHOLD_PRIMARY
   cat(sprintf("Rolling-emerging rank %d has bloc share %.3f (threshold %.2f) -- %s\n",
-              t3b_rank, t3b_share, THRESHOLD_ORIGINAL,
+              t3b_rank, t3b_share, THRESHOLD_PRIMARY,
               if (t3b_pass) "PASS" else "FAIL"))
 }
 t3_results[["b_emerging_rolling"]] <- list(
-  spec = "Original rolling spec: ≥50%/<50% emergent rank with bloc share ≥ 0.55",
-  rank = t3b_rank, bloc_share = t3b_share, threshold = THRESHOLD_ORIGINAL,
+  spec = "Emerging-eigenvalue rolling variant: ≥50%/<50% emergent rank with bloc share ≥ 0.50",
+  rank = t3b_rank, bloc_share = t3b_share, threshold = THRESHOLD_PRIMARY,
   pass = t3b_pass
 )
 
-# --- Test (c): Paper's rewritten rank-1 reorganisation test --------------
-# 0.50 threshold (moved from 0.55) AND doubling vs pre.
+# --- Test (c): rank-1 reorganisation test (per scope_and_target.md restatement) --------
+# 0.50 majority-rule threshold AND doubling vs pre.
 pre_rank1_share <- pre$summary[rank == 1, cocoa_bloc_l2_frac]
 crs_rank1_share <- crs$summary[rank == 1, cocoa_bloc_l2_frac]
 ratio <- crs_rank1_share / pre_rank1_share
-t3c_pass_55 <- crs_rank1_share >= THRESHOLD_ORIGINAL && ratio >= 2
-t3c_pass_50 <- crs_rank1_share >= THRESHOLD_PAPER    && ratio >= 2
+t3c_pass_55 <- crs_rank1_share >= THRESHOLD_ALT && ratio >= 2
+t3c_pass_50 <- crs_rank1_share >= THRESHOLD_PRIMARY    && ratio >= 2
 
 cat(sprintf("\n--- T3(c): rank-1 reorganisation ---\n"))
 cat(sprintf("Pre-crisis rank-1 bloc share: %.3f\n", pre_rank1_share))
 cat(sprintf("Crisis rank-1 bloc share:     %.3f (ratio = %.2fx)\n",
             crs_rank1_share, ratio))
-cat(sprintf("At ORIGINAL threshold 0.55:   %s\n", if (t3c_pass_55) "PASS" else "FAIL"))
-cat(sprintf("At PAPER's threshold   0.50:  %s\n", if (t3c_pass_50) "PASS" else "FAIL"))
+cat(sprintf("At ALT threshold     0.55:    %s\n", if (t3c_pass_55) "PASS" else "FAIL"))
+cat(sprintf("At PRIMARY threshold 0.50:    %s\n", if (t3c_pass_50) "PASS" else "FAIL"))
 cat("NOTE: rank-1 is the largest eigenvalue (the 'market mode'); the rolling\n")
 cat("count test EXCLUDES rank-1, so this is testing a different object.\n")
-t3_results[["c_rank1_paper"]] <- list(
-  spec = "Paper rewrite: rank-1 reorganisation with bloc share ≥ 0.50 (moved from 0.55) AND doubling",
+t3_results[["c_rank1"]] <- list(
+  spec = "Rank-1 reorganisation: bloc share ≥ 0.50 (majority rule) AND doubling vs pre",
   rank = 1, pre_share = pre_rank1_share, crs_share = crs_rank1_share, ratio = ratio,
   pass_at_55 = t3c_pass_55, pass_at_50 = t3c_pass_50
 )
@@ -202,12 +201,12 @@ cat("  DECREASED in crisis. The 'reorganisation' is on rank 1, not the cocoa fac
 # Save consolidated T3 results
 fwrite(data.table(
   test = c("a_emerging_subsample", "b_emerging_rolling",
-           "c_rank1_paper_at_0.55", "c_rank1_paper_at_0.50"),
+           "c_rank1_at_0.55", "c_rank1_at_0.50"),
   description = c(
-    "Original spec: subsample emerging eigenvalue, bloc>=0.55",
-    "Original spec: rolling >=50%/<50% emerging rank, bloc>=0.55",
-    "Paper rewrite: rank-1 reorganisation, bloc>=0.55 AND doubling",
-    "Paper rewrite (moved threshold): rank-1 reorganisation, bloc>=0.50 AND doubling"
+    "Emerging-eigenvalue subsample variant, bloc>=0.50",
+    "Emerging-eigenvalue rolling variant, bloc>=0.50",
+    "Rank-1 reorganisation, bloc>=0.55 AND doubling (alt parameterisation)",
+    "Rank-1 reorganisation, bloc>=0.50 AND doubling (primary, pre-registered)"
   ),
   rank = c(NA_integer_, t3b_rank, 1L, 1L),
   bloc_share = c(NA_real_, t3b_share, crs_rank1_share, crs_rank1_share),

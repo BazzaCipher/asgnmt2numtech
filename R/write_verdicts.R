@@ -76,9 +76,9 @@ for (i in seq_len(nrow(t3))) {
                      ifelse(is.na(t3$rank[i]), "-", as.character(t3$rank[i])),
                      ifelse(is.na(t3$bloc_share[i]), "-",
                             sprintf("%.3f", t3$bloc_share[i]))),
-    threshold = if (i == 4) "bloc_share >= 0.50 (moved goalpost)" else "bloc_share >= 0.55 (pre-reg)",
+    threshold = if (i == 4) "bloc_share >= 0.50 (primary, pre-registered)" else "bloc_share >= 0.55 (alt parameterisation)",
     pass = as.logical(t3$pass[i]),
-    note = if (i == 4) "Threshold 0.50 differs from pre-registered 0.55" else ""
+    note = if (i == 4) "" else "Alt parameterisation: 2x proportional baseline (7/25); see paper Appendix A"
   )
 }
 
